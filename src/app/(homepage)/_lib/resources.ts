@@ -10,8 +10,7 @@ export interface ResourceItem {
   title: string;
   description?: string;
   image: string;
-  /** Omit until the resource is published; the card then shows "Coming soon". */
-  link?: string;
+  link: string;
   duration?: string;
 }
 
@@ -32,6 +31,7 @@ export const resources: ResourceItem[] = [
     description:
       "How universities structure course discussions using Zedu to keep topics clear and accessible.",
     image: "/images/homepage/resources/image-1.png",
+    link: "#",
   },
   {
     id: 2,
@@ -41,6 +41,7 @@ export const resources: ResourceItem[] = [
     description:
       "Tips for teachers to encourage student participation and build a thriving online classroom.",
     image: "/images/homepage/resources/image-2.png",
+    link: "#",
   },
   {
     id: 3,
@@ -50,6 +51,7 @@ export const resources: ResourceItem[] = [
     description:
       "How bootcamps organize fast-paced learning programs, coordinate mentors, and track progress.",
     image: "/images/homepage/resources/image-3.png",
+    link: "#",
   },
   {
     id: 4,
@@ -59,6 +61,7 @@ export const resources: ResourceItem[] = [
     description:
       "Discover how AI help summarize discussions, answer questions, and support students Zedu workspace.",
     image: "/images/homepage/resources/image-4.png",
+    link: "#",
   },
   {
     id: 6,
@@ -67,6 +70,7 @@ export const resources: ResourceItem[] = [
     title: "Getting Started with Zedu for Universities",
     image: "/images/homepage/resources/webinar-1.png",
     duration: "45 min",
+    link: "#",
   },
   {
     id: 7,
@@ -75,6 +79,7 @@ export const resources: ResourceItem[] = [
     title: "Running Bootcamp Cohorts on Zedu Platform",
     image: "/images/homepage/resources/webinar-2.png",
     duration: "60 min",
+    link: "#",
   },
   {
     id: 8,
@@ -83,5 +88,6 @@ export const resources: ResourceItem[] = [
     title: "Using AI assistants in Simplifying Education",
     image: "/images/homepage/resources/webinar-3.png",
     duration: "30 min",
+    link: "#",
   },
 ];
