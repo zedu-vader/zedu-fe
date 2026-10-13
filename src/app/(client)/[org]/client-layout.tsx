@@ -33,6 +33,7 @@ import {
   resolveChannelIdForOrgSwitch,
 } from "~/utils/org-switch";
 import { useOrganisationUsers } from "~/hooks/useOrganisationUsers";
+import { isReservedPathSegment } from "~/lib/reserved-paths";
 
 const ClientLayout = ({
   children,
@@ -106,6 +107,14 @@ const ClientLayout = ({
 
       return null;
     };
+
+    // Marketing routes such as /contributors must not be treated as org slugs.
+    if (isReservedPathSegment(slug)) {
+      finish();
+      return () => {
+        cancelled = true;
+      };
+    }
 
     if (slug === "client") {
       dispatch({
