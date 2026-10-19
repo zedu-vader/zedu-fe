@@ -9,7 +9,12 @@ import React, {
 } from "react";
 import CreateFolderModal from "./CreateFolderModal";
 import FolderList from "./FolderList";
-import Header from "./header";
+import Header, { type HeaderHandle } from "./header";
+import {
+  FetchErrorState,
+  FilesEmptyState,
+  FoldersEmptyState,
+} from "./EmptyState";
 import DeleteFileModal from "./delete-file-modal";
 import BulkDeleteModal from "./bulk-delete-modal";
 import RenameFileModal from "./rename-file-modal";
@@ -189,8 +194,13 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ viewType, folderId }) => {
     null
   );
   // Loading states
-  const [isLoadingFiles, setIsLoadingFiles] = React.useState(false);
-  const [isLoadingFolders, setIsLoadingFolders] = React.useState(false);
+  const [isLoadingFiles, setIsLoadingFiles] = React.useState(true);
+  const [isLoadingFolders, setIsLoadingFolders] = React.useState(true);
+  // Fetch failure states (shown with a Retry button when nothing is displayed)
+  const [filesError, setFilesError] = React.useState(false);
+  const [foldersError, setFoldersError] = React.useState(false);
+
+  const headerRef = useRef<HeaderHandle | null>(null);
 
   // Folder navigation state
   const [currentFolderId, setCurrentFolderId] = React.useState<
@@ -412,9 +422,13 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ viewType, folderId }) => {
           response.data?.data?.pagination
         );
         setTotalFilePages(pagination ? Math.max(1, pagination.totalPages) : 1);
+        setFilesError(false);
+      } else {
+        setFilesError(true);
       }
     } catch (error) {
       console.error("Failed to fetch files:", error);
+      setFilesError(true);
       showError("Failed to load files");
     } finally {
       setIsLoadingFiles(false);
@@ -483,9 +497,13 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ viewType, folderId }) => {
             ? response.data.data.folders
             : []
         );
+        setFoldersError(false);
+      } else {
+        setFoldersError(true);
       }
     } catch (error) {
       console.error("Failed to fetch folders:", error);
+      setFoldersError(true);
       showError("Failed to load folders");
     } finally {
       setIsLoadingFolders(false);
@@ -985,6 +1003,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ viewType, folderId }) => {
           }`}
         >
           <Header
+            ref={headerRef}
             onNewFolderClick={handleNewFolderClick}
             onFileUpload={handleFileUpload}
             title={viewType}
@@ -1168,11 +1187,13 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ viewType, folderId }) => {
                         </div>
                       )}
                     </div>
+                  ) : foldersError ? (
+                    <FetchErrorState
+                      message="Failed to load folders"
+                      onRetry={fetchFolders}
+                    />
                   ) : (
-                    <div className="flex flex-col gap-2 text-[#344054] justify-center items-center mt-40">
-                      <p className="text-2xl">No folders yet</p>
-                      <p>Create a folder to get started</p>
-                    </div>
+                    <FoldersEmptyState onCreateFolder={handleNewFolderClick} />
                   )}
                 </>
               )}
@@ -1252,15 +1273,21 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ viewType, folderId }) => {
                 )}
                 {!isLoadingFiles &&
                   regularFiles.length === 0 &&
-                  pinnedFiles.length === 0 && (
+                  pinnedFiles.length === 0 &&
+                  (filesError ? (
+                    <FetchErrorState
+                      message="Failed to load files"
+                      onRetry={fetchFiles}
+                    />
+                  ) : viewType === "All files" || viewType === "My Files" ? (
+                    <FilesEmptyState
+                      onUploadClick={() => headerRef.current?.openFilePicker()}
+                      onFilesDropped={(droppedFiles) =>
+                        headerRef.current?.uploadFiles(droppedFiles)
+                      }
+                    />
+                  ) : (
                     <div className="flex flex-col gap-2 text-[#344054] justify-center items-center mt-40">
-                      {(viewType === "All files" ||
-                        viewType === "My Files") && (
-                        <>
-                          <p className="text-2xl">No files yet</p>
-                          <p>Upload or drag & drop to get started</p>
-                        </>
-                      )}
                       {viewType === "Shared with me" && (
                         <>
                           <p className="text-2xl">No Files Shared Yet</p>
@@ -1277,7 +1304,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ viewType, folderId }) => {
                         </>
                       )}
                     </div>
-                  )}
+                  ))}
               </>
             )}
           </section>
