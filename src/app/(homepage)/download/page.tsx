@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArrowBtn, DownloadAppBtn } from "../_components/ui/Button";
 import FeatureCard from "../_components/FeatureCard";
 import { DynamicFooter } from "../_components/footer/dynamic-footer";
+import { QRCodeDisplay } from "../_components/QRCodeDisplay";
 import { appStoreUrl, playStoreUrl } from "~/lib/env-urls";
 
 const APP_STORE_URL = appStoreUrl();
@@ -93,7 +94,7 @@ const DownLoadPage = () => {
           Join your classes, connect with others, and access everything right
           from your phone.
         </p>
-        <div className="flex w-full max-w-md flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+        <div className="flex w-full max-w-xl flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           {" "}
           <DownloadAppBtn
             text="Download on the"
@@ -174,7 +175,6 @@ const DownLoadPage = () => {
                 href={APP_STORE_URL}
                 dark
                 iconColor="#FFFFFF"
-                className="!px-4 !py-2 sm:!px-5"
               />
               <DownloadAppBtn
                 text="GET IT ON"
@@ -183,12 +183,11 @@ const DownLoadPage = () => {
                 href={PLAY_STORE_URL}
                 dark
                 iconColor="#FFFFFF"
-                className="!px-4 !py-2 sm:!px-5"
               />
             </div>
 
             <div className="flex w-full max-w-md items-center gap-4 rounded-2xl border border-neutral-200 px-4 py-3">
-              <div className="size-[68px] bg-slate-400 rounded-sm animate-pulse"></div>
+              <QRCodeDisplay url={PLAY_STORE_URL} size={80} />
 
               <div>
                 <p className="text-sm font-semibold text-neutral-900">
