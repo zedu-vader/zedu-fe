@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   description:
     "Zedu is a structured learning platform for bootcamps, schools, and universities. Organize cohorts, channels, and AI-powered learning in one workspace.",
   icons: {
-    icon: "/TelexIcon.svg",
+    icon: "/zedu-icon.png",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     title: "Zedu — Structured Learning for Bootcamps & Schools",

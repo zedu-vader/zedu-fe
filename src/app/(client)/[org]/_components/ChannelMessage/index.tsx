@@ -1,9 +1,10 @@
 "use client";
 import React, {
-  Fragment,
+  useCallback,
   useContext,
-  useRef,
   useEffect,
+  useEffectEvent,
+  useRef,
   useState,
 } from "react";
 
@@ -36,12 +37,20 @@ const ChannelsMessage = () => {
   const [showBadge, setShowBadge] = useState(false);
   const [popupId, setPopupId] = useState<any>(null);
   const [unreadDividerId, setUnreadDividerId] = useState<string | null>(null);
+  const [dividerOnTop, setDividerOnTop] = useState(false);
 
   const scrollableContainerRef = useRef<HTMLDivElement>(null);
   const hasDispatchedRef = useRef(false);
   const unreadCountRef = useRef<number>(0);
+  const threadCountRef = useRef<number>(0);
+  const capturedRef = useRef(false);
 
-  const clearChannelUnread = () => {
+  // Keep threadCount in a ref so getData's identity stays stable
+  useEffect(() => {
+    threadCountRef.current = state?.threadCount || 0;
+  }, [state?.threadCount]);
+
+  const clearChannelUnread = useCallback(() => {
     dispatch({
       type: ACTIONS.UPDATE_THREAD_COUNT,
       payload: {
@@ -51,21 +60,23 @@ const ChannelsMessage = () => {
       },
     });
     dispatch({ type: ACTIONS.THREAD_COUNT, payload: 0 });
-  };
+  }, [dispatch, id]);
 
-  const getData = async () => {
+  const getData = useCallback(async () => {
     if (!id) return;
     // Capture unread count once per channel opening (before clearing)
-    if (unreadCountRef.current === 0) {
-      unreadCountRef.current = state?.threadCount || 0;
+    if (!capturedRef.current) {
+      capturedRef.current = true;
+      unreadCountRef.current = threadCountRef.current;
     }
     await GetRequest(`/threads/channels/${id}?page=1&limit=1`);
     clearChannelUnread();
-  };
+  }, [id, clearChannelUnread]);
 
   // Reset unread capture when channel changes
   useEffect(() => {
     unreadCountRef.current = 0;
+    capturedRef.current = false;
     setUnreadDividerId(null);
   }, [id]);
 
@@ -73,7 +84,7 @@ const ChannelsMessage = () => {
   useEffect(() => {
     if (!id) return;
     getData();
-  }, [id]);
+  }, [id, getData]);
 
   useEffect(() => {
     const container = scrollableContainerRef.current;
@@ -99,12 +110,17 @@ const ChannelsMessage = () => {
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [id]);
+  }, [getData]);
 
-  useEffect(() => {
+  // Runs when new messages arrive; reads the latest badge and user without re-running on them.
+  const markReadOnNewMessage = useEffectEvent(() => {
     if (!showBadge && notify?.user_id !== user?.user_id) {
       getData();
     }
+  });
+
+  useEffect(() => {
+    markReadOnNewMessage();
   }, [messages]);
 
   // Set unread divider position after messages load
@@ -112,15 +128,16 @@ const ChannelsMessage = () => {
     if (messages && messages.length > 0 && unreadCountRef.current > 0) {
       // In column-reverse, messages[0] is newest (bottom), messages[length-1] is oldest (top)
       // Unread messages are the newest ones, so divider goes before messages[unreadCount]
-      const unreadIndex = Math.min(unreadCountRef.current, messages.length);
+      const unreadIndex = Math.min(unreadCountRef.current, messages.length - 1);
       const firstUnread = messages[unreadIndex];
       if (firstUnread) {
         // Issue 2 fix: if unread boundary is beyond loaded messages, use the oldest loaded message
         const targetMsg =
-          unreadCountRef.current > messages.length
+          unreadCountRef.current >= messages.length
             ? messages[messages.length - 1]
             : firstUnread;
         setUnreadDividerId(`unread-divider-${targetMsg.thread_id}`);
+        setDividerOnTop(unreadCountRef.current >= messages.length);
       }
     } else {
       setUnreadDividerId(null);
@@ -219,17 +236,19 @@ const ChannelsMessage = () => {
         style={{
           display: "flex",
           flexDirection: "column-reverse",
-          overflowY: "visible",
+          overflow: "visible",
         }}
         scrollableTarget="scrollableDivs"
         inverse={true}
       >
         {Object.entries(groupedMessages)?.map(([dateLabel, threads]: any) => (
-          <Fragment key={dateLabel}>
+          <div key={dateLabel} className="flex flex-col-reverse">
             {threads?.map((item: any, index: number) => {
               const nextMessage = threads[index + 1];
               const shouldShowAvatar =
-                !nextMessage || nextMessage.user_id !== item.user_id;
+                !nextMessage ||
+                nextMessage.user_id !== item.user_id ||
+                nextMessage.type === "system";
 
               const isSaved = bookmarks?.some(
                 (b: any) => b.thread_id === item.thread_id
@@ -239,29 +258,31 @@ const ChannelsMessage = () => {
               const isFirstUnread =
                 unreadDividerId === `unread-divider-${item.thread_id}`;
 
+              const unreadDividerEl = isFirstUnread ? (
+                <div
+                  id={unreadDividerId}
+                  className="flex items-center gap-3 my-3 px-5"
+                >
+                  <div
+                    className="flex-1 h-px"
+                    style={{ backgroundColor: "#e5e7eb" }}
+                  ></div>
+                  <span
+                    className="text-[11px] font-semibold uppercase tracking-wide"
+                    style={{ color: "#9CA3AF" }}
+                  >
+                    Unread messages
+                  </span>
+                  <div
+                    className="flex-1 h-px"
+                    style={{ backgroundColor: "#e5e7eb" }}
+                  ></div>
+                </div>
+              ) : null;
+
               return (
                 <React.Fragment key={index}>
-                  {isFirstUnread && (
-                    <div
-                      id={unreadDividerId}
-                      className="flex items-center gap-3 my-3 px-5"
-                    >
-                      <div
-                        className="flex-1 h-px"
-                        style={{ backgroundColor: "#e5e7eb" }}
-                      ></div>
-                      <span
-                        className="text-[11px] font-semibold uppercase tracking-wide"
-                        style={{ color: "#9CA3AF" }}
-                      >
-                        Unread messages
-                      </span>
-                      <div
-                        className="flex-1 h-px"
-                        style={{ backgroundColor: "#e5e7eb" }}
-                      ></div>
-                    </div>
-                  )}
+                  {isFirstUnread && !dividerOnTop && unreadDividerEl}
                   {isEdit && thread?.thread_id === item?.thread_id ? (
                     <div
                       className={`flex mb-5 mt-2 z-10 px-5 py-3 bg-blue-50 w-full`}
@@ -313,11 +334,12 @@ const ChannelsMessage = () => {
                       )}
                     </div>
                   )}
+                  {isFirstUnread && dividerOnTop && unreadDividerEl}
                 </React.Fragment>
               );
             })}
 
-            <div className="relative my-2">
+            <div className="sticky top-0 z-10 my-2">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-dotted border-[#E6EAEF]"></div>
               </div>
@@ -327,7 +349,7 @@ const ChannelsMessage = () => {
                 </span>
               </div>
             </div>
-          </Fragment>
+          </div>
         ))}
       </InfiniteScroll>
 

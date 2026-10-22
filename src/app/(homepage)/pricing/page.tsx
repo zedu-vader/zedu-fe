@@ -3,6 +3,7 @@ import { ogImageUrl, siteUrl } from "~/lib/env-urls";
 import { DynamicFooter } from "../_components/footer/dynamic-footer";
 import { FAQSection } from "../_components/home/FAQSection";
 import { PricingSection } from "../_components/home/PricingSection";
+import { JsonLd } from "../_components/seo/JsonLd";
 import { PricingComparisonTable } from "../_components/pricing/PricingComparisonTable";
 import { Table, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import {
@@ -11,6 +12,7 @@ import {
 } from "../_lib/pricingComparisonData";
 import { CircleHelp } from "lucide-react";
 import { pricingFAQs } from "../_lib/faqData";
+import { pricingStructuredData } from "../_lib/structuredData";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -26,9 +28,6 @@ export const metadata: Metadata = {
     "learning management pricing",
     "classroom communication plans",
   ],
-  icons: {
-    icon: "/TelexIcon.svg",
-  },
   openGraph: {
     title: "Zedu Pricing - Flexible Plans for Modern Learning Teams",
     description:
@@ -64,9 +63,13 @@ export const metadata: Metadata = {
 const PricingPage = () => {
   return (
     <div className="space-y-10">
+      <JsonLd data={pricingStructuredData} />
       <PricingSection showSubtitle />
 
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 lg:px-12 space-y-6 relative">
+      <div
+        id="compare-plans"
+        className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 sm:px-8 lg:px-12 space-y-6 relative"
+      >
         <div className="no-scrollbar">
           <Table className="min-w-[680px] table-fixed sm:min-w-[760px] no-scrollbar">
             <colgroup>
@@ -109,7 +112,11 @@ const PricingPage = () => {
           />
         ))}
       </div>
-      <FAQSection faqs={pricingFAQs} />
+
+      <div id="help-center">
+        <FAQSection faqs={pricingFAQs} />
+      </div>
+
       <DynamicFooter
         text="Start Building Structured Learning Today"
         description="Create organized channels, manage cohorts, and bring AI into your learning environment.
