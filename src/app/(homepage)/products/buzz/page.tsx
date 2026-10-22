@@ -22,9 +22,6 @@ export const metadata: Metadata = {
     "university class discussions",
     "interactive communication for students",
   ],
-  icons: {
-    icon: "/TelexIcon.svg",
-  },
   openGraph: {
     title: "Zedu Buzz - Instant Voice Conversations for Learning Teams",
     description:
@@ -137,7 +134,7 @@ const BuzzProductsPage = () => {
             <div className="relative aspect-[16/11] w-full sm:aspect-[4/3] lg:aspect-[16/10]">
               <Image
                 src="/images/homepage/products/buzz-hero.png"
-                alt="Zedu channels product screenshot"
+                alt="Zedu Buzz interface showing an active screen share, video meeting participants, and mobile call controls"
                 fill
                 priority
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 680px"

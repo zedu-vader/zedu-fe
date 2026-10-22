@@ -28,9 +28,6 @@ export const metadata: Metadata = {
     "learning management pricing",
     "classroom communication plans",
   ],
-  icons: {
-    icon: "/TelexIcon.svg",
-  },
   openGraph: {
     title: "Zedu Pricing - Flexible Plans for Modern Learning Teams",
     description:
@@ -65,63 +62,67 @@ export const metadata: Metadata = {
 
 const PricingPage = () => {
   return (
-    <>
+    <div className="space-y-10">
       <JsonLd data={pricingStructuredData} />
-      <div className="space-y-10">
-        <PricingSection showSubtitle />
+      <PricingSection showSubtitle />
 
-        <div className="relative mx-auto w-full max-w-7xl space-y-6 px-4 sm:px-8 lg:px-12">
-          <div className="no-scrollbar">
-            <Table className="no-scrollbar min-w-[680px] table-fixed sm:min-w-[760px]">
-              <colgroup>
-                <col className="w-[40%]" />
+      <div
+        id="compare-plans"
+        className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 sm:px-8 lg:px-12 space-y-6 relative"
+      >
+        <div className="no-scrollbar">
+          <Table className="min-w-[680px] table-fixed sm:min-w-[760px] no-scrollbar">
+            <colgroup>
+              <col className="w-[40%]" />
+              {pricingComparisonPlans.map((plan) => (
+                <col
+                  key={plan.key}
+                  style={{ width: `${60 / pricingComparisonPlans.length}%` }}
+                />
+              ))}
+            </colgroup>
+
+            <TableHeader>
+              <TableRow className="border-b border-neutral-200 hover:bg-transparent no-scrollbar">
+                <TableHead className="border-r border-neutral-200 px-4 py-3 text-left text-sm font-semibold text-neutral-700">
+                  Plan Features
+                </TableHead>
                 {pricingComparisonPlans.map((plan) => (
-                  <col
+                  <TableHead
                     key={plan.key}
-                    style={{
-                      width: `${60 / pricingComparisonPlans.length}%`,
-                    }}
-                  />
-                ))}
-              </colgroup>
-
-              <TableHeader>
-                <TableRow className="no-scrollbar border-b border-neutral-200 hover:bg-transparent">
-                  <TableHead className="border-r border-neutral-200 px-4 py-3 text-left text-sm font-semibold text-neutral-700">
-                    Plan Features
+                    className="border-r border-neutral-200 px-4 py-3 text-center text-sm font-semibold text-neutral-900 last:border-r-0"
+                  >
+                    {plan.label}
                   </TableHead>
-                  {pricingComparisonPlans.map((plan) => (
-                    <TableHead
-                      key={plan.key}
-                      className="border-r border-neutral-200 px-4 py-3 text-center text-sm font-semibold text-neutral-900 last:border-r-0"
-                    >
-                      {plan.label}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-            </Table>
-          </div>
-
-          {pricingComparisonDemoSections.map((section) => (
-            <PricingComparisonTable
-              key={section.key}
-              plans={pricingComparisonPlans}
-              section={section}
-              rowInfoIcon={
-                <CircleHelp className="h-3.5 w-3.5 text-neutral-400" />
-              }
-              className="mb-8 last:mb-0"
-            />
-          ))}
+                ))}
+              </TableRow>
+            </TableHeader>
+          </Table>
         </div>
-        <FAQSection faqs={pricingFAQs} />
-        <DynamicFooter
-          text="Start Building Structured Learning Today"
-          description="Create organized channels, manage cohorts, and bring AI into your learning environment."
-        />
+
+        {pricingComparisonDemoSections.map((section) => (
+          <PricingComparisonTable
+            key={section.key}
+            plans={pricingComparisonPlans}
+            section={section}
+            rowInfoIcon={
+              <CircleHelp className="h-3.5 w-3.5 text-neutral-400" />
+            }
+            className="mb-8 last:mb-0"
+          />
+        ))}
       </div>
-    </>
+
+      <div id="help-center">
+        <FAQSection faqs={pricingFAQs} />
+      </div>
+
+      <DynamicFooter
+        text="Start Building Structured Learning Today"
+        description="Create organized channels, manage cohorts, and bring AI into your learning environment.
+"
+      />
+    </div>
   );
 };
 
