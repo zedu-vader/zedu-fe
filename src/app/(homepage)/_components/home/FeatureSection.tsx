@@ -53,7 +53,7 @@ export const FeatureSection = () => {
               <div>
                 <OutlineBtn
                   text="Start Your Cohort"
-                  onClick={() => router.push("/auth/login")}
+                  onClick={() => router.push("/auth/sign-up")}
                 />
               </div>
             </div>
